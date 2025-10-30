@@ -1,0 +1,59 @@
+How validation happens with Zod :
+
+1. Define rules with Zod
+
+const step1Schema = z.object({
+  firstName: z.string().nonempty("First name is required"),
+  lastName: z.string().nonempty("Last name is required"),
+});
+
+👉 This says:
+- firstName must be a non-empty string.
+- lastName must be a non-empty string.
+- If not, show the error messages.
+
+2. Tell React Hook Form to use Zod
+
+useForm({
+  resolver: zodResolver(fullSchema),
+});
+
+👉'zodResolver' is like a bridge: it connects Zod’s validation rules with React Hook Form’s validation system.
+
+3. When the user clicks "Next" or "Submit"
+
+- trigger(stepFields) → asks RHF to validate just those fields using the Zod schema.
+- handleSubmit(onSubmit) → asks RHF to validate all fields using the Zod schema.
+
+4. Zod checks the values
+
+- RHF sends the current form values to Zod.
+- Zod checks them against the schema rules.
+- If values don’t match → it returns an error message.
+- If values match → it returns valid data.
+
+5. Errors go back into React Hook Form
+
+- RHF takes Zod’s error messages and stores them in formState.errors.
+- Inside <Controller>, you read fieldState.error.message → and display it below the input.
+
+🧩 Example
+
+Schema rule:
+firstName: z.string().nonempty("First name is required")
+
+User input:
+{ "firstName": "" }
+
+Zod checks:
+→ Empty string ❌ not allowed.
+→ Returns { message: "First name is required" }.
+
+RHF shows that message under the input field.
+
+Once user types "John" → Zod says ✅ valid → error disappears.
+
+👉 In one sentence:
+Validation works by defining rules in Zod → passing them through zodResolver 
+→ React Hook Form checks values against those rules on Next/Submit 
+→ errors are shown if rules are broken.
